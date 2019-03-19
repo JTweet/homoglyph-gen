@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+
+# homoglyph-gen
+# Copyright (C) 2019, Oliver "JTweet" Springer
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This script generates a list of possible homoglyph representations
+# of a domain name.
+# Domain names must be in the format "domain.tld", subdomains are
+# currently ignored. Should you need to find homoglyphs for a
+# subdomain, please enter "subdomain.tld".
+#
+# This script may be useful for finding (or monitoring) homoglyph
+# domains which may be used to host phishing sites.
+
+
+import argparse
+import homoglyphs as hg
+from itertools import product
+
+parser = argparse.ArgumentParser(
+    description="Find homoglyph attacks on domain names and display results.")
+parser.add_argument('domain_name', metavar="domain", type=str,
+                    nargs=1, help="Domain name to check, format 'domain.tld'")
+parser.add_argument(
+    '-I', '--idna', choices=['on', 'off'], default='on',
+    help="Toggle idna conversion")
+args = parser.parse_args()
+
+domain_input = args.domain_name[0].split('.')
+domain_tl = tuple(['.']) + tuple([domain_input[len(domain_input) - 1]])
+domain = domain_input[len(domain_input) - 2]
+
+glyphs = []
+result = []
+for c in domain:
+    glyphs.append(hg.Homoglyphs(categories=(
+        hg.Categories.get_all())).get_combinations(c))
+
+if args.idna == "on":
+    for l in product(*glyphs):
+        e = ''.join(l + domain_tl).encode('idna')
+        if e not in result:
+            result.append(e)
+else:
+    for l in product(*glyphs):
+        e = ''.join(l + domain_tl)
+        if e not in result:
+            result.append(e)
+
+result.remove(args.domain_name[0])
+
+for n in result:
+    print(n)
