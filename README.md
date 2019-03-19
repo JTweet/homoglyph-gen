@@ -9,6 +9,9 @@ homoglyph-gen was developed using Python 3.7.2, other versions are untested, but
 ## External dependencies
 * [homoglyphs](https://pypi.org/project/homoglyphs/)
 
+## Performance
+This script will load all possible homoglyph categories and attempt to find all possible combinations. This may take a while and will probably eat a bit of memory in its current form.
+
 ## Usage
 ```
 # Display homoglyph domains for o-sp.com IDNA encoded
